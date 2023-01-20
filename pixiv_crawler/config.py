@@ -65,7 +65,7 @@ DOWNLOAD_CONFIG = {
 
     # abort request / download
     #   after 10 unsuccessful attempts
-    "N_TIMES": 10,
+    "N_TIMES": 20,
 
     # need tag ?
     "WITH_TAG": True,

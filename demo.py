@@ -17,7 +17,7 @@ import models.convnext
 import models.convnext_isotropic
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-cls_names=['其他', '高质量涩图', '百合']
+cls_names=['其他', '高质量涩图', '多人', '低质量缩略图']
 
 def str2bool(v):
     """
@@ -46,16 +46,18 @@ def get_args_parser():
 
     # Evaluation parameters
     parser.add_argument('--crop_pct', type=float, default=None)
-    parser.add_argument('--pos_thr', type=list, default=[2.0, 0.55, 0.2])
+    parser.add_argument('--pos_thr', type=list, default=[0.8, 0.55, 0.2])
 
     # Dataset parameters
-    parser.add_argument('--nb_classes', default=1000, type=int,
+    parser.add_argument('--nb_classes', default=3, type=int,
                         help='number of the classification types')
     parser.add_argument('--imagenet_default_mean_and_std', type=str2bool, default=True)
-    parser.add_argument('--out_dir', default='demo_731',
+    parser.add_argument('--out_dir', default='demo_2',
+                        help='path where to save, empty for no saving')
+    parser.add_argument('--img_dir', default='images_2',
                         help='path where to save, empty for no saving')
 
-    parser.add_argument('--ckpt', default='ckpt/checkpoint-best_t4.pth', help='resume from checkpoint')
+    parser.add_argument('--ckpt', default='ckpt/checkpoint-best_t5.pth', help='resume from checkpoint')
 
     return parser
 
@@ -81,14 +83,16 @@ def demo(img_list, args):
 
         pred = net(img)
         cls = pred.view(-1).argmax().item()
-        #print(cls)
-        if cls==1:
-            print(os.path.basename(path), pred[0,:3], torch.softmax(pred, dim=-1)[0,:3])
 
         conf = torch.softmax(pred, dim=-1)[0, cls]
-        if conf<args.pos_thr[cls]:
-            continue
 
+        print(path, cls, cls_names[cls], conf)
+
+        if cls==0:
+            if conf>0.8:
+                os.makedirs(f'./{args.out_dir}/trash{cls}', exist_ok=True)
+                copyfile(path, os.path.join(args.out_dir, f'trash{cls}', os.path.basename(path)[:-4]+'.png'))
+                continue
         #pimg.save(os.path.join(out_dir, str(cls), os.path.basename(path)[:-4]+'.png'))
         copyfile(path, os.path.join(args.out_dir, cls_names[cls], os.path.basename(path)[:-4]+'.png'))
 
@@ -102,10 +106,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser('ConvNeXt demo script', parents=[get_args_parser()])
     args = parser.parse_args()
 
-    for i in range(3):
-        os.makedirs(f'./demo_731/{cls_names[i]}', exist_ok=True)
+    for name in cls_names:
+        os.makedirs(f'./{args.out_dir}/{name}', exist_ok=True)
 
-    imgs=get_imgs('../anime_filter/pixiv_crawler/images_731/')
+    imgs=get_imgs(f'./{args.img_dir}/')
     #imgs=['./imgs/t1.jpg', './imgs/t2.jpg', './imgs/t3.jpg']
 
     demo(imgs, args)

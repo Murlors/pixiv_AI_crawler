@@ -22,7 +22,7 @@ from pixiv_crawler.crawlers.ranking_crawler import RankingCrawler
 from pixiv_crawler.crawlers.keyword_crawler import KeywordCrawler
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-cls_names=['其他', '高质量涩图', '百合']
+cls_names=['其他', '高质量涩图', '多人', '低质量缩略图']
 
 def str2bool(v):
     """
@@ -109,6 +109,9 @@ def run_crawler(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('ConvNeXt pixiv AI crawler', parents=[get_args_parser()])
     args = parser.parse_args()
+
+    if args.keyword:
+        DOWNLOAD_CONFIG["STORE_PATH"]=os.path.join('images',f"images_{args.keyword.replace(' ', '_')}/")
 
     for name in cls_names:
         os.makedirs(os.path.join(DOWNLOAD_CONFIG["STORE_PATH"], name), exist_ok=True)

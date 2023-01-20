@@ -102,4 +102,8 @@ def downloadImageWithCLS(url: Tuple[str, str], im_classifier):
     if cls_name is not None:
         return downloadImage(url[1], sub_folder=cls_name)
     else:
+        image_name = url[0][url[0].rfind("/") + 1:]
+        image_path = os.path.join(DOWNLOAD_CONFIG["STORE_PATH"],'低质量缩略图', image_name)
+        with open(image_path, "wb") as f:
+            f.write(buffer_small)
         return 0

@@ -40,7 +40,7 @@ class KeywordCrawler():
         urls: Set[str] = set()
         url = "https://www.pixiv.net/ajax/search/artworks/{}?" + \
               "word={}&order=popular_d" + f"&mode={self.mode}" + \
-              "&p={}&s_mode=s_tag_full&type=all&lang=zh"
+              "&p={}&s_mode=s_tag&type=all&lang=zh"
         for i in range(n_page):
             urls.add(url.format(self.keyword, self.keyword, i + 1))
 
