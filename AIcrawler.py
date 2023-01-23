@@ -1,3 +1,4 @@
+import datetime
 import os.path
 
 import cv2
@@ -17,7 +18,7 @@ import models.convnext
 import models.convnext_isotropic
 
 from pixiv_crawler import config
-from pixiv_crawler.config import DOWNLOAD_CONFIG
+from pixiv_crawler.config import DOWNLOAD_CONFIG, MODE_CONFIG
 from pixiv_crawler.crawlers.ranking_crawler import RankingCrawler
 from pixiv_crawler.crawlers.keyword_crawler import KeywordCrawler
 
@@ -51,7 +52,7 @@ def get_args_parser():
 
     # Evaluation parameters
     parser.add_argument('--crop_pct', type=float, default=None)
-    parser.add_argument('--pos_thr', type=list, default=[2.0, 0.5, 0.2])
+    parser.add_argument('--pos_thr', type=list, default=[0.85, 0.5, 0.2])
 
     # Dataset parameters
     parser.add_argument('--nb_classes', default=3, type=int,
@@ -64,6 +65,11 @@ def get_args_parser():
     parser.add_argument('--capacity', default=1024*8, type=int, help='crawler capacity')
     parser.add_argument('--keyword', default=None, type=str, help='for keyword crawler')
     parser.add_argument('--n_images', default=500, type=int, help='for keyword crawler')
+
+    parser.add_argument('--yesterday', action='store_true', help='for ranking crawler')
+    parser.add_argument('--date', default=None, type=str, help='for ranking crawler')
+    parser.add_argument('--range', default=1, type=int, help='for ranking crawler')
+    parser.add_argument('--ranking_modes', default='daily', type=str, help='for ranking crawler')
 
     return parser
 
@@ -112,6 +118,20 @@ if __name__ == '__main__':
 
     if args.keyword:
         DOWNLOAD_CONFIG["STORE_PATH"]=os.path.join('images',f"images_{args.keyword.replace(' ', '_')}/")
+    else:
+        MODE_CONFIG["RANGE"]=args.range
+        MODE_CONFIG["MODE"]=args.ranking_modes
+        if args.yesterday:
+            yesterday = datetime.date.today()-datetime.timedelta(days=1)
+            MODE_CONFIG["START_DATE"]=yesterday
+            store_path=yesterday.strftime('%y%m%d')
+            DOWNLOAD_CONFIG["STORE_PATH"]=os.path.join('images',f"images_{store_path}/")
+        elif args.date:
+            date = datetime.datetime.strptime(args.date, '%y%m%d').date()
+            MODE_CONFIG["START_DATE"]=date
+            store_path=args.date if args.range==1 else f"{args.date}_{(date+args.datetime.timedelta(days=args.range-1)).strftime('%y%m%d')}"
+            DOWNLOAD_CONFIG["STORE_PATH"]=os.path.join('images',f"images_{store_path}/")
+
 
     for name in cls_names:
         os.makedirs(os.path.join(DOWNLOAD_CONFIG["STORE_PATH"], name), exist_ok=True)

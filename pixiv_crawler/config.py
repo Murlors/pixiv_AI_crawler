@@ -32,14 +32,14 @@ MODE_CONFIG = {
 OUTPUT_CONFIG = {
     # verbose / simplified output
     "VERBOSE": False,
-    "PRINT_ERROR": False
+    "PRINT_ERROR": True
 }
 
 NETWORK_CONFIG = {
     # proxy setting
     #   you should customize your proxy setting accordingly
     #   default is for clash
-    "PROXY": {"https": "http://127.0.0.1:1080"},
+    "PROXY": {"https": "http://127.0.0.1:7655"},
 
     # common request header
     "HEADER": {
@@ -61,11 +61,11 @@ USER_CONFIG = {
 DOWNLOAD_CONFIG = {
     # image save path
     #   NOTE: DO NOT miss "/"
-    "STORE_PATH": "images_85/",
+    "STORE_PATH": "images/images85/",
 
     # abort request / download
     #   after 10 unsuccessful attempts
-    "N_TIMES": 20,
+    "N_TIMES": 10,
 
     # need tag ?
     "WITH_TAG": True,
